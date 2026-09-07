@@ -20,6 +20,7 @@ print("Carpeta base:", BASE_DIR)
 
 # Para mostrar en pantalla todas las columnas y que no corte la salida
 pd.set_option("display.max_columns", None)   # que no corte columnas
+pd.set_option("display.max_rows", None)      # que no corte filas
 pd.set_option("display.width", 120)
 
 
@@ -49,6 +50,62 @@ print(df.describe())
 
 paso("5) Nulos por columna")
 print(df.isna().sum())
+
+
+
+
+
+
+
+
+# ANALSIS DE VARIABLES Y GRAFICOS
+
+##### CRIM
+''' Como parte del analisis queremos corroborar si los outliers del boxplot son valores realistas o errores.'''
+Q1 = df['CRIM'].quantile(0.25)
+Q3 = df['CRIM'].quantile(0.75)
+IQR = Q3 - Q1
+
+limite_inferior = Q1 - 1.5 * IQR
+limite_superior = Q3 + 1.5 * IQR
+
+print(f"Q1={Q1}, Q3={Q3}, IQR={IQR}")
+print(f"Límite superior (outliers por encima de esto): {limite_superior}")
+
+# Para mostrar en pantalla todas las columnas y que no corte la salida
+pd.set_option("display.max_columns", None)   # que no corte columnas
+pd.set_option("display.max_rows", None)      # que no corte filas
+pd.set_option("display.width", 120)
+
+outliers = df[df['CRIM'] > limite_superior]
+print(outliers.sort_values('CRIM'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+RECORDAR SACAR ESTO DE COMENTARIOS (SON LOS GRAFICOS)
+
 
 
 
@@ -187,3 +244,4 @@ archivos = sorted(os.listdir(CARPETA))
 print(f"{len(archivos)} archivos en '{CARPETA}/':")
 for f in archivos:
     print("  -", f)
+'''
