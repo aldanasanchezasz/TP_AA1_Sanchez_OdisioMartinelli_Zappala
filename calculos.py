@@ -1,7 +1,6 @@
 # Librerías
 import os
 from pathlib import Path
-
 import pandas as pd
 import matplotlib
 matplotlib.use("Agg")  # para gráficos: backend sin ventana, solo escribe archivos PNG
@@ -25,7 +24,7 @@ pd.set_option("display.width", 120)
 
 
 
-# ANALISIS DESCRIPTIVO
+
 
 # Función para imprimir un separador y un título en la salida
 def paso(titulo):
@@ -33,6 +32,12 @@ def paso(titulo):
     print("\n" + "=" * 60)
     print(titulo)
     print("=" * 60)
+
+
+
+
+
+# ANALISIS DESCRIPTIVO
 
 # Métricas descriptivas del dataset
 paso("1) Tamaño dataset")
@@ -55,10 +60,15 @@ print(df.isna().sum())
 
 
 
+# VARIABLES CATEGORICAS
+df['CHAS'] = df['CHAS'].astype('category') # ya está codificada.
+
+
 
 
 
 # ANALSIS DE VARIABLES Y GRAFICOS
+
 
 ##### CRIM
 ''' Como parte del analisis queremos corroborar si los outliers del boxplot son valores realistas o errores.'''
@@ -72,13 +82,73 @@ limite_superior = Q3 + 1.5 * IQR
 print(f"Q1={Q1}, Q3={Q3}, IQR={IQR}")
 print(f"Límite superior (outliers por encima de esto): {limite_superior}")
 
-# Para mostrar en pantalla todas las columnas y que no corte la salida
-pd.set_option("display.max_columns", None)   # que no corte columnas
-pd.set_option("display.max_rows", None)      # que no corte filas
-pd.set_option("display.width", 120)
+# Filtramos las filas con CRIM por encima del límite superior (~12.05)
+# y las ordenamos de menor a mayor para observarlas.
 
-outliers = df[df['CRIM'] > limite_superior]
-print(outliers.sort_values('CRIM'))
+outliers_crim = df[df['CRIM'] > limite_superior]
+print(f"Cantidad de outliers de CRIM (> {limite_superior:.2f}): {len(outliers_crim)} de {len(df)} filas")
+print(outliers_crim.head())
+
+df_crim_filtrado = df[df['CRIM'] <= limite_superior]    
+print(df_crim_filtrado.head())
+
+print(outliers_crim[['CRIM']].describe())
+print(df_crim_filtrado[['CRIM']].describe())
+
+
+# Gráficos estadísticos de los outliers de CRIM
+CARPETA_CRIM = BASE_DIR / "graficos_outliers_crim"
+os.makedirs(CARPETA_CRIM, exist_ok=True)
+sns.set_theme(style="whitegrid")
+
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+# 1) Histograma de CRIM en todo el dataset, con el límite superior marcado
+sns.histplot(df['CRIM'], bins=40, kde=True, ax=axes[0, 0])
+axes[0, 0].axvline(limite_superior, color="red", linestyle="--",
+                   label=f"Límite superior = {limite_superior:.2f}")
+axes[0, 0].set_title("Distribución de CRIM (dataset completo)")
+axes[0, 0].legend()
+
+# 2) Histograma sólo de los outliers (los 69 valores por encima del límite)
+sns.histplot(outliers_crim['CRIM'], bins=30, kde=False, color="tab:orange", ax=axes[0, 1])
+axes[0, 1].set_title(f"Distribución de CRIM en los outliers (n={len(outliers_crim)})")
+
+# 3) Boxplot comparativo: CRIM con y sin outliers
+comp = pd.concat([
+    df_crim_filtrado[['CRIM']].assign(grupo="Sin outliers"),
+    outliers_crim[['CRIM']].assign(grupo="Outliers"),
+])
+sns.boxplot(data=comp, x="grupo", y="CRIM", ax=axes[1, 0])
+axes[1, 0].set_title("Boxplot de CRIM: sin outliers vs outliers")
+
+# 4) Dispersión CRIM vs MEDV marcando los outliers
+axes[1, 1].scatter(df_crim_filtrado['CRIM'], df_crim_filtrado['MEDV'],
+                   alpha=0.4, s=15, label="Resto")
+axes[1, 1].scatter(outliers_crim['CRIM'], outliers_crim['MEDV'],
+                   alpha=0.7, s=20, color="tab:red", label="Outliers CRIM")
+axes[1, 1].set_xlabel("CRIM")
+axes[1, 1].set_ylabel("MEDV")
+axes[1, 1].set_title("CRIM vs MEDV")
+axes[1, 1].legend()
+
+fig.suptitle("Análisis estadístico de outliers de CRIM", fontweight="bold")
+fig.tight_layout()
+ruta_crim = CARPETA_CRIM / "outliers_crim.png"
+fig.savefig(ruta_crim, dpi=100, bbox_inches="tight")
+plt.close(fig)
+print("Gráfico guardado en:", ruta_crim)
+
+# agregar conclusion
+
+
+### ZN
+# No aporta información para el modelo por l oque decidimos eliminarla.
+df = df.drop(columns='ZN')
+
+
+### INDUS
+
 
 
 
