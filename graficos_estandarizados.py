@@ -1,4 +1,13 @@
-# Graficos con informacion original del dataset.
+# Mismos graficos que graficos_iniciales.py, pero sobre las variables ya
+# estandarizadas (media 0, desvio 1) que arma calculos.py (df_train_std).
+# Sirve para observar como cambian las distribuciones una vez estandarizadas.
+#
+# OJO: las matrices de correlacion (Pearson y Spearman) dan EXACTAMENTE
+# iguales a las de graficos_iniciales.py -> ambos coeficientes son
+# invariantes a la escala (estandarizar no cambia la correlacion entre dos
+# variables, solo su media y su desvio). Lo que SI cambia es cada grafico
+# individual (histograma/boxplot): ahora todas las variables quedan
+# centradas en 0 y con la misma dispersion, comparables entre si.
 
 
 import os
@@ -7,47 +16,29 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from funciones_basicas import BASE_DIR
-from calculos import df_original as df
+from calculos import df_train_std as df
 
 matplotlib.use("Agg")
 
 
-
-"""
-Genera un set de gráficos por cada columna del dataset.
-
-Lógica:
-  - Variable OBJETIVO (MEDV): histograma + boxplot.
-  - Variable "categórica" (pocos valores distintos, ej. CHAS):
-        countplot (frecuencias).
-  - Variable "continua" (muchos valores distintos):
-        histograma + boxplot (outliers).
-  - Extra: mapa de calor de correlaciones.
-
-  No se grafica la relación de cada variable contra MEDV, salvo en las
-  matrices de correlación (Pearson y Spearman) que incluyen a MEDV.
-
-Todos los .png se guardan en la carpeta 'graficos_dataset_original/'.
-"""
-
 # ----------------------------------------------------------------------
 # Configuración
 # ----------------------------------------------------------------------
-CARPETA = BASE_DIR / "graficos_dataset_original"   # se crea al lado de este .py
-OBJETIVO = "MEDV"           # variable a predecir
-UMBRAL_CATEGORICA = 10      # columnas con <= 10 valores distintos -> categóricas
+CARPETA = BASE_DIR / "graficos_dataset_estandarizado"
+OBJETIVO = "MEDV"           # no se estandariza (es el target)
+UMBRAL_CATEGORICA = 10
 
 sns.set_theme(style="whitegrid")
 os.makedirs(CARPETA, exist_ok=True)
 
 
-# Guardamos cada grafico generado en una carpeta llamada 'Graficos'
 def guardar(fig, nombre):
     """Guarda la figura y la cierra para liberar memoria."""
     ruta = os.path.join(CARPETA, nombre)
     fig.tight_layout()
     fig.savefig(ruta, dpi=100, bbox_inches="tight")
     plt.close(fig)
+
 
 # ----------------------------------------------------------------------
 # 1) Funciones de graficado
@@ -58,7 +49,7 @@ def graficar_objetivo():
     axes[0].set_title(f"Distribución de {OBJETIVO}")
     sns.boxplot(x=df[OBJETIVO], ax=axes[1])
     axes[1].set_title(f"Boxplot de {OBJETIVO}")
-    fig.suptitle(f"{OBJETIVO} — variable objetivo", fontweight="bold")
+    fig.suptitle(f"{OBJETIVO} — variable objetivo (sin estandarizar)", fontweight="bold")
     guardar(fig, f"00_{OBJETIVO}_objetivo.png")
 
 
@@ -66,10 +57,10 @@ def graficar_continua(col, idx):
     fig, axes = plt.subplots(1, 2, figsize=(11, 4))
 
     sns.histplot(df[col].dropna(), kde=True, ax=axes[0])
-    axes[0].set_title(f"Distribución de {col}")
+    axes[0].set_title(f"Distribución de {col} (estandarizada)")
 
     sns.boxplot(x=df[col], ax=axes[1])
-    axes[1].set_title(f"Boxplot de {col} (outliers)")
+    axes[1].set_title(f"Boxplot de {col} (estandarizada)")
 
     fig.suptitle(f"{col}", fontweight="bold")
     guardar(fig, f"{idx:02d}_{col}_continua.png")
@@ -81,7 +72,7 @@ def graficar_categorica(col, idx):
     sns.countplot(x=df[col], ax=ax)
     ax.set_title(f"Frecuencia de {col}")
 
-    fig.suptitle(f"{col} (categórica)", fontweight="bold")
+    fig.suptitle(f"{col} (categórica, no se estandariza)", fontweight="bold")
     guardar(fig, f"{idx:02d}_{col}_categorica.png")
 
 
@@ -106,24 +97,11 @@ for idx, col in enumerate(df.columns, start=1):
 corr = df.corr(numeric_only=True)
 fig, ax = plt.subplots(figsize=(11, 9))
 sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm", center=0, ax=ax)
-ax.set_title("Matriz de correlaciones")
+ax.set_title("Matriz de correlaciones (Pearson) — datos estandarizados")
 guardar(fig, "zz_1_correlaciones.png")
 
-
-# ----------------------------------------------------------------------
-# Relaciones no lineales: matriz de correlación de Spearman
-# ----------------------------------------------------------------------
-
-''' Pearson sólo capta relación lineal. Spearman (basado en rangos) capta
-    cualquier relación monótona, sea lineal o no. '''
-
-# Gráfico: matriz de correlación de Spearman entre TODAS las variables,
-# incluyendo MEDV — análoga a la matriz de Pearson de arriba, pero usando el
-# método que capta relación monótona, sea lineal o no. Comparando ambas
-# matrices se ve qué pares de variables tienen una relación no lineal entre
-# sí (o con MEDV) que Pearson no refleja.
 corr_spearman = df.corr(method="spearman", numeric_only=True)
 fig, ax = plt.subplots(figsize=(11, 9))
 sns.heatmap(corr_spearman, annot=True, fmt=".2f", cmap="coolwarm", center=0, ax=ax)
-ax.set_title("Matriz de correlaciones de Spearman (relaciones no lineales)")
+ax.set_title("Matriz de correlaciones de Spearman — datos estandarizados")
 guardar(fig, "zz_2_correlaciones_spearman.png")
