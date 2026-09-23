@@ -127,3 +127,24 @@ fig, ax = plt.subplots(figsize=(11, 9))
 sns.heatmap(corr_spearman, annot=True, fmt=".2f", cmap="coolwarm", center=0, ax=ax)
 ax.set_title("Matriz de correlaciones de Spearman (relaciones no lineales)")
 guardar(fig, "zz_2_correlaciones_spearman.png")
+
+# ----------------------------------------------------------------------
+# 4) Relaciones entre variables y variable objetivo
+# ----------------------------------------------------------------------
+
+# Scatterplots de cada variable numérica contra MEDV.
+# Permiten observar visualmente si existe una relación lineal,
+# no lineal o si aparecen grupos/outliers.
+
+for col in df.select_dtypes(include="number").columns:
+    if col == OBJETIVO:
+        continue
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+    sns.scatterplot(data=df, x=col, y=OBJETIVO, ax=ax)
+
+    ax.set_title(f"{col} vs {OBJETIVO}")
+    ax.set_xlabel(col)
+    ax.set_ylabel(OBJETIVO)
+
+    guardar(fig, f"relacion_{col}_{OBJETIVO}.png")

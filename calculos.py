@@ -46,7 +46,62 @@ paso("5) Nulos por columna")
 print(df.isna().sum())
 
 
+# ----------------------------------------------------------------------
+# Análisis de variables y datos faltantes
+# ----------------------------------------------------------------------
 
+print("\n" + "=" * 70)
+print("ANÁLISIS DE VARIABLES")
+print("=" * 70)
+
+# Cantidad y porcentaje de valores faltantes por variable
+faltantes = pd.DataFrame({
+    "faltantes": df_original.isna().sum(),
+    "porcentaje": df_original.isna().mean() * 100
+})
+
+print("\nValores faltantes por variable:")
+print(faltantes[faltantes["faltantes"] > 0].sort_values("faltantes", ascending=False))
+
+
+# Cantidad de valores distintos por variable
+print("\nCantidad de valores distintos:")
+print(df_original.nunique().sort_values())
+
+
+# Estadísticos descriptivos de las variables numéricas
+print("\nEstadísticos descriptivos:")
+print(df_original.describe().T)
+
+# ----------------------------------------------------------------------
+# Análisis de valores faltantes
+# ----------------------------------------------------------------------
+
+print("\n" + "=" * 70)
+print("ANÁLISIS DE VALORES FALTANTES")
+print("=" * 70)
+
+for col in df_original.columns:
+    cantidad = df_original[col].isna().sum()
+
+    if cantidad > 0:
+        porcentaje = cantidad / len(df_original) * 100
+
+        print(f"\nVariable: {col}")
+        print(f"Valores faltantes: {cantidad}")
+        print(f"Porcentaje: {porcentaje:.2f}%")
+
+# ----------------------------------------------------------------------
+# Decisión sobre el tratamiento de valores faltantes
+# ----------------------------------------------------------------------
+
+# Se eliminan las filas sin valor en MEDV, ya que es la variable objetivo.
+# También se eliminan las filas con 6 o más valores faltantes por presentar
+# una cantidad elevada de información ausente.
+# CHAS se imputa mediante la moda calculada sobre el conjunto de entrenamiento.
+# Las variables numéricas se imputan mediante KNNImputer.
+# La estandarización y la imputación se ajustan utilizando únicamente train
+# para evitar utilizar información del conjunto de prueba.
 
 
 
@@ -105,19 +160,50 @@ Son barrios con tasas de criminalidad muy altas, pero son casos reales.
 Por lo tanto, decidimos mantenerlos en el dataset.'''
 
 
+# ----------------------------------------------------------------------
+# Análisis de variables descartadas
+# ----------------------------------------------------------------------
+
+print("\n" + "=" * 70)
+print("ANÁLISIS DE VARIABLES DESCARTADAS")
+print("=" * 70)
+
+# ZN
+print("\n--- ZN ---")
+print(df_original["ZN"].describe())
+print(f"Valores faltantes: {df_original['ZN'].isna().sum()}")
+print(f"Correlación de ZN con MEDV: {df_original['ZN'].corr(df_original['MEDV']):.4f}")
+print(f"Cantidad de ceros en ZN: {(df_original['ZN'] == 0).sum()}")
+print(f"Porcentaje de ceros en ZN: {(df_original['ZN'] == 0).mean() * 100:.2f}%")
+
+# RAD
+print("\n--- RAD ---")
+print(df_original["RAD"].describe())
+print(f"Valores faltantes: {df_original['RAD'].isna().sum()}")
+print(f"Correlación de RAD con MEDV: {df_original['RAD'].corr(df_original['MEDV']):.4f}")
+print(f"Correlación de RAD con TAX: {df_original['RAD'].corr(df_original['TAX']):.4f}")
+
+
+
+
+
+# ----------------------------------------------------------------------
+# Decisión sobre variables descartadas
+# ----------------------------------------------------------------------
+
 
 #### ZN ####
-# No aporta información para el modelo por l oque decidimos eliminarla.
+# ZN se descarta debido a su distribución altamente concentrada en cero:
+# el 66.91% de sus valores son cero, lo que limita su variabilidad efectiva.
+#
 df = df.drop(columns='ZN')
 
-
-
 #### RAD ####
-# altamente correlacionada con TAX -> misma info. Decidimos eliminarla.
+# RAD se descarta principalmente por su alta correlación con TAX (0.8731),
+# indicando una fuerte redundancia entre ambas variables predictoras.
+# Además, RAD presenta 28 valores faltantes.
+
 df = df.drop(columns='RAD')
-
-
-
 
 
 # -------------------------------------------------------------------------------------------------

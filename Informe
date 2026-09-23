@@ -49,3 +49,28 @@ Características de entrada en orden:
 13) LSTAT: % de población de menor estatus socioeconómico
 Variable de salida (target):
 14) MEDV: Valor mediano de las viviendas ocupadas por sus propietarios en miles de dólares [k$]
+
+
+### Análisis y tratamiento de datos faltantes
+
+Se realizó un análisis de los valores faltantes presentes en el conjunto de datos. Se observó que todas las variables presentan algunos valores ausentes, aunque en ningún caso la cantidad de datos faltantes supera aproximadamente el 5% de las observaciones. Por este motivo, se consideró conveniente conservar la mayor cantidad posible de información mediante técnicas de imputación, en lugar de eliminar directamente todas las filas que contienen valores faltantes.
+
+En primer lugar, se eliminaron las observaciones que no poseen un valor para `MEDV`, ya que esta variable corresponde a la variable objetivo del modelo y no es posible utilizar una observación para el entrenamiento si se desconoce el valor que se pretende predecir.
+
+Luego, se analizaron las filas que presentaban una cantidad elevada de valores faltantes. Se decidió eliminar aquellas que tenían 6 o más variables faltantes, debido a que en estos casos una proporción importante de la información de la observación estaba ausente. Aplicando este criterio, se eliminaron 5 observaciones del conjunto de entrenamiento y ninguna del conjunto de prueba.
+
+Para las variables numéricas se utilizó `KNNImputer`. Este método permite estimar los valores faltantes a partir de observaciones similares. Antes de realizar la imputación, las variables fueron estandarizadas para evitar que las variables con mayor escala tuvieran una influencia excesiva en el cálculo de las distancias utilizadas por KNN.
+
+La variable `CHAS`, de carácter binario, fue imputada utilizando la moda calculada sobre el conjunto de entrenamiento. De esta manera, los valores faltantes se reemplazan por la categoría más frecuente.
+
+En todos los casos, los parámetros necesarios para realizar la imputación se calcularon utilizando únicamente el conjunto de entrenamiento y luego se aplicaron al conjunto de prueba. Esto permite evitar la utilización de información del conjunto de prueba durante el entrenamiento del modelo.
+
+### Análisis de las variables descartadas
+
+Durante el análisis exploratorio se decidió excluir las variables `ZN` y `RAD` del conjunto de predictores utilizados en el modelo.
+
+En el caso de `ZN`, se observó una distribución altamente concentrada en cero: el 66,91% de sus valores corresponden a cero y su mediana también es igual a cero. Si bien presenta una correlación positiva moderada con la variable objetivo `MEDV` (0,3617), su escasa variabilidad efectiva llevó a considerar que su aporte como predictor continuo podía ser limitado.
+
+En el caso de `RAD`, se observó una correlación de -0,3422 con `MEDV`, pero principalmente una correlación muy elevada con `TAX`, de 0,8731. Esto indica que ambas variables contienen información fuertemente relacionada, por lo que mantenerlas simultáneamente puede introducir redundancia entre los predictores. Además, `RAD` presenta 28 valores faltantes.
+
+Por estos motivos, se decidió trabajar con un conjunto de predictores que excluye `ZN` y `RAD`, manteniendo las restantes variables para el análisis y la construcción del modelo.
