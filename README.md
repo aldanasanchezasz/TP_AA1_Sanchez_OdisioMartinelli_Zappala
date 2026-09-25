@@ -2,7 +2,7 @@
 
 Trabajo práctico de regresión de la Tecnicatura en Inteligencia Artificial (Facultad de Ciencias Exactas, Ingeniería y Agrimensura), materia **Aprendizaje Automático 1**, 2026 C2.
 
-**Integrantes:** Sánchez · Odisio Martinelli · Zappalá
+**Integrantes:** Aldana Desiré Sánchez · Lisandro Odisio Martinelli · Marisa Silvina Zappalá
 
 El objetivo es predecir `MEDV` (valor mediano de las viviendas, en miles de USD) a partir de las características de cada barrio de Boston, comparando distintos modelos de regresión lineal con scikit-learn. El enunciado completo está en [TrabajoPrácticoRegresiónAA1_2026C2.pdf](TrabajoPrácticoRegresiónAA1_2026C2.pdf).
 
@@ -34,23 +34,6 @@ Variables predictoras: `CRIM`, `ZN`, `INDUS`, `CHAS`, `NOX`, `RM`, `AGE`, `DIS`,
 6. **Modelos.** Regresión lineal (`LinearRegression`), gradiente descendente implementado a mano (batch, estocástico y mini-batch), Ridge, Lasso y Elastic Net.
 7. **Hiperparámetros.** `learning_rate` y épocas del gradiente descendente; `alpha` de Ridge, Lasso y Elastic Net elegido por validación cruzada de 5 folds **solo sobre train** (test se usa una única vez al final).
 8. **Comparación.** Métrica principal: RMSE de test (queda en las mismas unidades que `MEDV`). También se reportan R², MAE y la brecha train-test.
-
-## Resultados
-
-Comparación final en el conjunto de test (de menor a mayor RMSE):
-
-| Modelo | R² test | RMSE test | MAE test |
-|---|---|---|---|
-| **Ridge (alpha=10)** | 0.382 | 7.167 | 4.517 |
-| Elastic Net (alpha=0.0316, l1_ratio=0.5) | 0.378 | 7.194 | 4.540 |
-| Lasso (alpha=0.0316) | 0.357 | 7.314 | 4.641 |
-| Gradiente descendente (lr=0.1, 300 épocas) | 0.345 | 7.382 | 4.696 |
-| OLS | 0.341 | 7.401 | 4.710 |
-
-- **Mejor modelo:** Ridge con `alpha=10`.
-- **Learning rate:** con `lr` de 0.0001 y 0.001 el error baja muy lento; 0.01 y 0.1 convergen cerca del óptimo de OLS; 0.3 y 0.5 divergen.
-- **Fitting:** no es del todo bueno. Ningún modelo pasa de R² test ≈ 0.38. Varias relaciones fuertes con `MEDV` (`CRIM`, `LSTAT`, `NOX`, `AGE`) no son lineales, y un modelo lineal no puede capturarlas. La regularización sí reduce el sobreajuste (brecha train-test de 0.306 en OLS contra 0.262 en Ridge).
-- **Próximos pasos:** transformar variables (por ejemplo `log(CRIM)`), agregar términos polinómicos o pasar a modelos no lineales.
 
 ## Cómo ejecutarlo
 
