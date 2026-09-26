@@ -1,10 +1,14 @@
-# TP Aprendizaje Automático 1 — Predicción de precios de casas (Boston)
+## Aprendizaje Automático 1
+## Facultad de Ciencias Exactas, Ingeniería y Agrimensura
 
-Trabajo práctico de regresión de la Tecnicatura en Inteligencia Artificial (Facultad de Ciencias Exactas, Ingeniería y Agrimensura), materia **Aprendizaje Automático 1**, 2026 C2.
+## Trabajo Practico 1
+
+## Predicción de precios de casas (Boston)
 
 **Integrantes:** Aldana Desiré Sánchez · Lisandro Odisio Martinelli · Marisa Silvina Zappalá
 
-El objetivo es predecir `MEDV` (valor mediano de las viviendas, en miles de USD) a partir de las características de cada barrio de Boston, comparando distintos modelos de regresión lineal con scikit-learn. El enunciado completo está en [TrabajoPrácticoRegresiónAA1_2026C2.pdf](TrabajoPrácticoRegresiónAA1_2026C2.pdf).
+## Objetivo
+Predecir `MEDV` (valor mediano de las viviendas, en miles de USD) a partir de las características de cada barrio de Boston, comparando distintos modelos de regresión lineal con scikit-learn. El enunciado completo está en [TrabajoPrácticoRegresiónAA1_2026C2.pdf](TrabajoPrácticoRegresiónAA1_2026C2.pdf).
 
 ## Contenido del repositorio
 
