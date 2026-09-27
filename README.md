@@ -17,8 +17,8 @@ Predecir `MEDV` (valor mediano de las viviendas, en miles de USD) a partir de la
 | [codigo.ipynb](codigo.ipynb) | Notebook con todo el trabajo: análisis descriptivo, preprocesamiento, modelos, optimización de hiperparámetros, comparación y conclusión |
 | [house-prices-tp.csv](house-prices-tp.csv) | Dataset (556 filas, 13 predictoras + target `MEDV`, con valores faltantes) |
 | [requirements.txt](requirements.txt) | Dependencias de Python (versiones fijadas) |
-| [graficos_dataset_original/](graficos_dataset_original/) | Histogramas, boxplots, countplots y matrices de correlación (Pearson y Spearman) del dataset original |
-| [graficos_dataset_estandarizado/](graficos_dataset_estandarizado/) | Los mismos gráficos sobre las variables ya estandarizadas |
+| [graficos_dataset_original/](graficos_dataset_original/) | Histogramas, boxplots, violinplots, countplots, scatter vs `MEDV` y matrices de correlación (Pearson y Spearman) del dataset original |
+| [graficos_dataset_estandarizado/](graficos_dataset_estandarizado/) | Los mismos gráficos sobre las predictoras de train ya estandarizadas, más un violinplot conjunto |
 | [graficos_modelo/](graficos_modelo/) | Curvas de error del gradiente descendente y barridos de hiperparámetros (`alpha`, `learning_rate`) |
 
 ## Dataset
@@ -27,17 +27,19 @@ Variables predictoras: `CRIM`, `ZN`, `INDUS`, `CHAS`, `NOX`, `RM`, `AGE`, `DIS`,
 
 ## Metodología
 
-1. **Análisis descriptivo.** Estadísticas, nulos por columna, histogramas/boxplots por variable y matrices de correlación de Pearson y Spearman.
+1. **Análisis descriptivo.** Estadísticas, nulos por columna, histogramas, boxplots y violinplots por variable, scatter de cada predictora vs `MEDV`, `MEDV` según `CHAS` y matrices de correlación de Pearson y Spearman.
 2. **Decisiones sobre variables.**
-   - Outliers de `CRIM`: se conservan (son barrios reales con alta criminalidad, no errores de carga).
-   - `ZN` se elimina (poco aporte) y `RAD` también (muy correlacionada con `TAX`).
+   - Valores extremos (ej. outliers de `CRIM`): se conservan (son barrios reales con alta criminalidad).
+   - Filas con valores imposibles (`RAD` fuera de sus valores 1–8 y 24, `TAX` con decimales, `ZN`/`AGE`/`PTRATIO`/`MEDV` con más decimales de los registrados): se descartan 48 filas con una regla fija. Quedan las 506 filas del dataset original de Boston.
+   - Se conservan las 13 predictoras.
    - `CHAS` se trata como categórica (ya viene codificada 0/1).
-3. **Train / test.** Se descartan las filas sin `MEDV` y se separa 80 % / 20 % (`random_state=42`) *antes* de imputar y estandarizar, para evitar data leakage.
+3. **Train / test.** Se descartan las filas sin `MEDV` y se separa 80 % / 20 % (`random_state=30`) *antes* de imputar y estandarizar, para evitar data leakage.
 4. **Valores faltantes.** Se descartan las filas con demasiados nulos simultáneos; `CHAS` se imputa por la moda y el resto con `KNNImputer` (k=5) sobre datos estandarizados. Imputer y scaler se ajustan solo con train.
-5. **Multicolinealidad.** VIF calculado sobre train: ninguna variable supera 5.
+5. **Multicolinealidad.** VIF calculado sobre train: `TAX` (~8.4) y `RAD` (~7.1) superan 5 pero no 10 (multicolinealidad moderada, están muy correlacionadas entre sí). Se conservan; la regularización de Ridge/Lasso/Elastic Net atenúa su efecto.
 6. **Modelos.** Regresión lineal (`LinearRegression`), gradiente descendente implementado a mano (batch, estocástico y mini-batch), Ridge, Lasso y Elastic Net.
-7. **Hiperparámetros.** `learning_rate` y épocas del gradiente descendente; `alpha` de Ridge, Lasso y Elastic Net elegido por validación cruzada de 5 folds **solo sobre train** (test se usa una única vez al final).
-8. **Comparación.** Métrica principal: RMSE de test (queda en las mismas unidades que `MEDV`). También se reportan R², MAE y la brecha train-test.
+7. **Hiperparámetros.** `learning_rate` y épocas del gradiente descendente; `alpha` de Ridge, Lasso y Elastic Net elegido por validación cruzada de 5 folds **solo sobre train**, con imputación y escalado dentro de cada fold (`Pipeline`). Test se usa una única vez al final.
+8. **Mejora.** Transformaciones no lineales de las variables (log de `LSTAT`, `CRIM` y `DIS`, y `RM²`), validadas por CV sobre train.
+9. **Comparación.** Métrica principal: RMSE de test (queda en las mismas unidades que `MEDV`). También se reportan R², MAE y la brecha train-test. Mejor modelo: Ridge (alpha=0.1) con variables transformadas, R² test = 0.866, RMSE test = 3.33 (R² de CV ≈ 0.76).
 
 ## Cómo ejecutarlo
 
