@@ -1,3 +1,10 @@
 ipykernel>=7.0
 numpy>=2.0
 pandas>=3.0
+matplotlib
+seaborn
+scikit-learn
+statsmodels
+geopandas
+geopy
+adjustText
