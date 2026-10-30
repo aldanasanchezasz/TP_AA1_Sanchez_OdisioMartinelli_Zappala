@@ -83,6 +83,8 @@ python -m venv .venv
 pip install -r requirements.txt
 jupyter notebook TP-clasificacion-AA1.ipynb
 ```
+Recomendacion: reiniciar kernel si se quiere ejecutar el notebook en la misma sesion.
+Para ello, presionar Ctrl + Shift + P, y elegir en entorno virtual correspondiente.
 
 Notas:
 - El notebook lee `weatherAUS_2026C2.csv` desde esta carpeta.
