@@ -88,6 +88,6 @@ Para ello, presionar Ctrl + Shift + P, y elegir en entorno virtual correspondien
 
 Notas:
 - El notebook lee `weatherAUS_2026C2.csv` desde esta carpeta.
-- Además de lo listado en `requirements.txt`, el notebook importa `scikit-learn`, `seaborn`, `matplotlib`, `geopandas`, `adjustText`, `geopy` y `statsmodels`, que conviene agregar al archivo.
-- La geocodificación de las ciudades (ArcGIS) y el mapa descargan datos de internet.
+- Además de lo listado en `requirements.txt`, el notebook importa `scikit-learn`, `seaborn`, `matplotlib`, `geopandas`, `adjustText` y `statsmodels`, que conviene agregar al archivo.
+- Las coordenadas de las estaciones (listado oficial del BOM) y el mapa descargan datos de internet.
 - La imputación con KNN puede tardar algunos minutos.
